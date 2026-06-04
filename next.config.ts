@@ -1,7 +1,27 @@
-import type { NextConfig } from "next";
+const nextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.sanity.io',
+      },
+         {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+        port: '',
+        pathname: '/**',
+      },
+      // Voeg hier andere hosts toe als nodig
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
 
-const nextConfig: NextConfig = {
-  /* config options here */
-};
+    ],
+  },
+  
+}
 
-export default nextConfig;
+export default nextConfig
