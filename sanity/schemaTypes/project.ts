@@ -65,18 +65,51 @@ defineField({
     }),
 
     // 4. PROJECTBEELDEN
-    defineField({
-      name: 'projectImages',
-      title: 'Projectbeelden',
-      type: 'array',
-      of: [{
-        type: 'image',
-        options: { hotspot: true },
-        fields: [
-          defineField({ name: 'alt', title: 'Alt tekst', type: 'string' }),
-        ],
-      }],
-    }),
+defineField({
+  name: "projectImages",
+  title: "Projectbeelden",
+  type: "array",
+  of: [
+    {
+      type: "image",
+      options: { hotspot: true },
+      fields: [
+        defineField({
+          name: "alt",
+          title: "Alt tekst",
+          type: "string",
+        }),
+
+        defineField({
+          name: "caption",
+          title: "Titel",
+          type: "string",
+        }),
+
+        defineField({
+          name: "subtitle",
+          title: "Omschrijving",
+          type: "string",
+        }),
+
+        defineField({
+          name: "layout",
+          title: "Layout",
+          type: "string",
+          options: {
+            list: [
+              { title: "Full width", value: "full" },
+              { title: "Half width", value: "half" },
+              { title: "Detail", value: "detail" },
+            ],
+          },
+          initialValue: "half",
+        }),
+      ],
+    },
+  ],
+}),
+
 
     // 5. AANPAK / PROCES
     defineField({

@@ -2,41 +2,18 @@
 
 import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
-import { groq } from "next-sanity";
 import { notFound } from "next/navigation";
 
+import { projectQuery } from "@/sanity/lib/projectQueries";
+
 import ProjectHero from "@/components/projecten/project/ProjectHero";
-import ProjectSnapshot from "@/components/projecten/project/ProjectSnapshot";
 import ProjectChallenge from "@/components/projecten/project/ProjectChallenge";
 import ProjectApproach from "@/components/projecten/project/ProjectApproach";
-// import ProjectImpactImage from "@/components/projecten/project/ProjectResult"; 
 import ProjectResult from "@/components/projecten/project/ProjectResult";
 import ProjectInBeeld from "@/components/projecten/project/ProjectInBeeld";
+import ProjectNavigation from "@/components/projecten/project/ProjectNavigation";
 
-const projectQuery = groq`
-*[_type == "project" && slug.current == $slug][0] {
-  _id,
-  projectName,
-  slug,
-  heroImage { asset, alt, hotspot },
-  heroTagline,
-  location,
-  projectDate,
-  client { name, url },
-  context,
-  scope,
-  projectImages[] { asset, alt, hotspot },
-  processSteps,
-  result,
-  resultImage { asset, alt, hotspot },  // ← Nieuw veld
-  resultQuote,                           // ← Nieuw veld
-  ctaText,
-  ctaButton,
-  subcategory->{ title, slug }
-}
-`;
-
-
+import CTASection from "@/components/categories/CTASection";
 
 
 export default async function ProjectPage({
@@ -46,35 +23,32 @@ export default async function ProjectPage({
 }) {
   const { slug } = await params;
 
-  const project = await client.fetch(projectQuery, { slug });
-  const projectImagesForBeeld = project.projectImages?.map((img: any, index: number) => {
-  const imgUrl = img.asset?._ref
-    ? urlFor(img).width(2000).quality(90).auto("format").url()
-    : null;
-  
-  if (!imgUrl) return null;
-  
-  // Bepaal het type op basis van index of een specifiek veld
-  let type: "full" | "half" | "detail" = "half";
-  
-  if (index === 0) type = "full";
-  else if (index === 1 || index === 2) type = "half";
-  else if (index === 3) type = "detail";
-  else type = "half";
-  
-  return {
-    type,
-    url: imgUrl,
-    alt: img.alt || `Project visual ${index + 1}`,
-    caption: img.caption || undefined,
-    subtitle: img.subtitle || undefined,
-  };
-}).filter(Boolean);
+  const data = await client.fetch(projectQuery, { slug });
 
+  const project = data?.project;
+  console.log("PROJECT IMAGES", project?.projectImages);
+  const allProjects = data?.allProjects || [];
 
-  if (!project) {
-    notFound();
-  }
+  if (!project) notFound();
+
+  const currentIndex = allProjects.findIndex(
+    (p: any) => p.slug === slug
+  );
+
+  const previousProject =
+    currentIndex > 0
+      ? allProjects[currentIndex - 1]
+      : null;
+
+  const nextProject =
+    currentIndex < allProjects.length - 1
+      ? allProjects[currentIndex + 1]
+      : null;
+
+  console.log("CURRENT", project.projectName);
+  console.log("PREVIOUS", previousProject?.projectName);
+  console.log("NEXT", nextProject?.projectName);
+  console.log("NEXT PROJECT", nextProject);
 
   const heroUrl = project.heroImage?.asset?._ref
     ? urlFor(project.heroImage)
@@ -84,64 +58,104 @@ export default async function ProjectPage({
         .url()
     : null;
 
+  const resultImageUrl = project.resultImage?.asset?._ref
+    ? urlFor(project.resultImage)
+        .width(2400)
+        .quality(95)
+        .auto("format")
+        .url()
+    : heroUrl;
+
+
   return (
-// In je project page:
+    <main className="bg-[#050505]">
+      <ProjectHero
+        title={project.projectName}
+        imageUrl={heroUrl}
+        tagline={project.heroTagline}
+        category={project.subcategory?.title}
+        location={project.location}
+        year={
+          project.projectDate
+            ? new Date(project.projectDate)
+                .getFullYear()
+                .toString()
+            : undefined
+        }
+      />
 
-<main className="bg-[#050505]">
-  {/* Hero */}
-  <ProjectHero
-    title={project.projectName}
-    imageUrl={heroUrl}
-    tagline={project.heroTagline}
-    category={project.subcategory?.title}
-    location={project.location}
-    year={project.projectDate ? new Date(project.projectDate).getFullYear().toString() : undefined}
-  />
+      <ProjectChallenge
+        title={project.projectName}
+        challenge={
+          project.context ||
+          "Bob Wassalon wilde een opvallende en duurzame gevelconstructie die de zichtbaarheid vanaf de weg sterk zou vergroten."
+        }
+        challengeNumber="01"
+      />
 
-  {/* De Uitdaging */}
-  <ProjectChallenge
-    title={project.projectName}
-    challenge={project.context || "Bob Wassalon wilde een opvallende en duurzame gevelconstructie die de zichtbaarheid vanaf de weg sterk zou vergroten."}
-    challengeNumber="01"
-  />
+      <ProjectApproach
+        steps={[
+          {
+            number: "01",
+            title: "Ontwerp",
+            description:
+              "Conceptontwikkeling en 3D-visualisaties die perfect aansluiten bij de merkidentiteit.",
+          },
+          {
+            number: "02",
+            title: "Engineering",
+            description:
+              "Technische uitwerking en constructieberekeningen voor een duurzame oplossing.",
+          },
+          {
+            number: "03",
+            title: "Productie",
+            description:
+              "High-end productie met premium materialen en afwerking.",
+          },
+          {
+            number: "04",
+            title: "Montage",
+            description:
+              "Professionele installatie door gecertificeerde specialisten.",
+          },
+        ]}
+      />
 
+      <ProjectResult
+        resultText={
+          project.result ||
+          "Het resultaat is een opvallende en duurzame gevelconstructie."
+        }
+        imageUrl={resultImageUrl}
+        imageAlt={
+          project.resultImage?.alt || "Project resultaat"
+        }
+        quote={project.resultQuote}
+      />
 
-  {/* Onze Aanpak */}
-  <ProjectApproach
-    steps={[
-      {
-        number: "01",
-        title: "Ontwerp",
-        description: "Conceptontwikkeling en 3D-visualisaties die perfect aansluiten bij de merkidentiteit."
-      },
-      {
-        number: "02",
-        title: "Engineering",
-        description: "Technische uitwerking en constructieberekeningen voor een duurzame oplossing."
-      },
-      {
-        number: "03",
-        title: "Productie",
-        description: "High-end productie met premium materialen en afwerking."
-      },
-      {
-        number: "04",
-        title: "Montage",
-        description: "Professionele installatie door gecertificeerde specialisten."
-      }
-    ]}
-  />
+      
 
-<ProjectResult
-  resultText={project.result || "Het resultaat is een opvallende en duurzame gevelconstructie..."}
-  imageUrl={project.resultImage?.asset?._ref ? urlFor(project.resultImage).width(2400).quality(95).auto("format").url() : heroUrl}
-  imageAlt={project.resultImage?.alt || "Project resultaat"}
-  quote={project.resultQuote}
+      <ProjectInBeeld
+        images={project.projectImages || []}
+      />
+
+      <ProjectNavigation
+  previousProject={previousProject}
+  nextProject={nextProject}
 />
 
+<CTASection
+  data={{
+    heading: "Heb je een vergelijkbaar project.",
+    subtext:
+      "Van ontwerp en engineering tot productie en montage. We denken graag mee over een oplossing die past bij jouw locatie, merk en doelstellingen.",
+    primaryLabel: "Project bespreken",
+    secondaryLabel: "Gratis advies",
+  }}
+/>
 
-
-<ProjectInBeeld images={projectImagesForBeeld || []} />
-</main>
+    
+    </main>
   );
 }
