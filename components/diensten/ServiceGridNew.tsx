@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { ArrowUpRight } from "@phosphor-icons/react"
@@ -15,38 +15,33 @@ type Category = {
   title: string
   tagline?: string | null
   shortDescription?: string | null
-  description?: string | null
-  slug?: {
-    current: string
-  }
-  image?: {
-    asset?: {
-      url?: string
-    }
-    alt?: string
-  }
-  homepageImage?: {
-    asset?: {
-      url?: string
-    }
-    alt?: string
-  }
+  slug?: { current: string }
   color?: string | null
+  homepageImage?: { asset?: { url?: string } }
+  image?: { asset?: { url?: string } }
 }
 
-type ServicesGridNewProps = {
+type ServicesProps = {
   categories: Category[]
 }
 
-
-export default function ServicesGridNew({ categories }: ServicesGridNewProps) {
-  
+export default function ServicesAtmosphere({ categories }: ServicesProps) {
   const sectionRef = useRef<HTMLElement>(null)
+  const bgRef = useRef<HTMLDivElement>(null)
+  const [activeIndex, setActiveIndex] = useState<number | null>(null)
+
+  const services = categories.map((category, index) => ({
+    id: String(index + 1).padStart(2, "0"),
+    title: category.title,
+    sub: category.tagline ?? category.shortDescription ?? "",
+    href: `/diensten/${category.slug?.current}`,
+    color: category.color ?? "#f7f704",
+    image: category.homepageImage?.asset?.url ?? category.image?.asset?.url ?? "",
+  }))
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-
-      // ── HEADING CHARS ────────────────────────────────────────
+      // Heading animation
       gsap.to(".ss-w1, .ss-w2, .ss-w3", {
         y: 0,
         duration: 1.1,
@@ -60,18 +55,11 @@ export default function ServicesGridNew({ categories }: ServicesGridNewProps) {
         { opacity: 1, x: 0, duration: 0.7, ease: "power3.out", delay: 0.2 }
       )
 
-      // ── ROWS ─────────────────────────────────────────────────
+      // Row animations
       gsap.utils.toArray<HTMLElement>(".ss-row").forEach((row) => {
-        const imgWrap = row.querySelector(".ss-img-wrap") as HTMLElement
-        const img     = row.querySelector(".ss-img") as HTMLElement
-        const ghost   = row.querySelector(".ss-ghost") as HTMLElement
-        const border  = row.querySelector(".ss-border") as HTMLElement
+        const ghost = row.querySelector(".ss-ghost") as HTMLElement
+        const border = row.querySelector(".ss-border") as HTMLElement
 
-        // Initial states
-        gsap.set(imgWrap, { clipPath: "inset(0 100% 0 0)" })
-        gsap.set(img,     { scale: 1.1 })
-
-        // Border reveal on scroll
         if (border) {
           gsap.fromTo(border,
             { scaleX: 0, transformOrigin: "left center" },
@@ -88,9 +76,7 @@ export default function ServicesGridNew({ categories }: ServicesGridNewProps) {
           )
         }
 
-        // Ghost number scrub
         if (ghost) {
-          gsap.set(ghost, { opacity: 1 })
           gsap.fromTo(ghost,
             { y: 40 },
             {
@@ -100,75 +86,92 @@ export default function ServicesGridNew({ categories }: ServicesGridNewProps) {
                 trigger: row,
                 start: "top bottom",
                 end: "bottom top",
-                scrub: 2,
+                scrub: 1.5,
               },
             }
           )
         }
-
-        // HOVER IN
-        row.addEventListener("mouseenter", () => {
-          gsap.to(imgWrap, { clipPath: "inset(0 0% 0 0)", duration: 0.8, ease: "expo.inOut" })
-          gsap.to(img,     { scale: 1, duration: 1.4, ease: "power3.out" })
-          gsap.to(row.querySelector(".ss-title"), {
-            x: 16, duration: 0.5, ease: "power3.out",
-          })
-          gsap.to(row.querySelector(".ss-arrow"), {
-            opacity: 1, x: 0, duration: 0.4, ease: "power3.out",
-          })
-        })
-
-        // HOVER OUT
-        row.addEventListener("mouseleave", () => {
-          gsap.to(imgWrap, { clipPath: "inset(0 100% 0 0)", duration: 0.6, ease: "expo.inOut" })
-          gsap.to(img,     { scale: 1.1, duration: 0.6, ease: "power3.in" })
-          gsap.to(row.querySelector(".ss-title"), {
-            x: 0, duration: 0.4, ease: "power3.out",
-          })
-          gsap.to(row.querySelector(".ss-arrow"), {
-            opacity: 0, x: -8, duration: 0.3, ease: "power3.in",
-          })
-        })
       })
-
     }, sectionRef)
 
     return () => ctx.revert()
   }, [])
 
-const services = categories.map((category, index) => ({
-  id: String(index + 1).padStart(2, "0"),
-  title: category.title,
-  sub: category.tagline ?? category.shortDescription ?? "",
-  href: `/diensten/${category.slug?.current}`,
-  image:
-    category.homepageImage?.asset?.url ??
-    category.image?.asset?.url ??
-    "",
-  color: category.color ?? "#f7f704",
-}))
+  // Background image transition with slow zoom
+  useEffect(() => {
+    if (!bgRef.current) return
+
+    if (activeIndex !== null && services[activeIndex]?.image) {
+      const bgElement = bgRef.current
+      const imgElement = bgElement.querySelector(".ss-bg-img") as HTMLElement
+
+      gsap.to(bgElement, {
+        opacity: 1,
+        duration: 0.8,
+        ease: "power2.inOut",
+      })
+
+      if (imgElement) {
+        gsap.fromTo(imgElement,
+          { scale: 1 },
+          { scale: 1.08, duration: 12, ease: "none", repeat: -1, yoyo: true }
+        )
+      }
+    } else {
+      const bgElement = bgRef.current
+      const imgElement = bgElement.querySelector(".ss-bg-img") as HTMLElement
+
+      gsap.to(bgElement, {
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.inOut",
+      })
+
+      if (imgElement) {
+        gsap.killTweensOf(imgElement)
+        gsap.set(imgElement, { scale: 1 })
+      }
+    }
+  }, [activeIndex, services])
+
+  const currentBgImage = activeIndex !== null ? services[activeIndex]?.image : null
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative min-h-screen bg-[#080808] text-white"
-    >
-      {/* Noise */}
+    <section ref={sectionRef} className="relative min-h-screen bg-[#080808] text-white overflow-hidden">
+      {/* ATMOSFERISCHE ACHTERGROND */}
       <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-[1] opacity-[0.032]"
-        style={{
-          mixBlendMode: "overlay",
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-          backgroundSize: "180px 180px",
-        }}
-      />
+        ref={bgRef}
+        className="pointer-events-none fixed inset-0 z-0 opacity-0"
+        style={{ willChange: "opacity" }}
+      >
+        {currentBgImage && (
+          <>
+            <img
+              src={currentBgImage}
+              alt=""
+              className="ss-bg-img absolute inset-0 h-full w-full object-cover"
+              style={{ willChange: "transform" }}
+            />
+            {/* Donkere overlay — zorgt dat tekst leesbaar blijft */}
+            <div className="absolute inset-0 bg-black/70" />
+            {/* Subtiele blur */}
+            <div className="absolute inset-0 backdrop-blur-[1px]" />
+          </>
+        )}
+        {/* Noise texture */}
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-[0.04] mix-blend-overlay"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+            backgroundSize: "180px 180px",
+          }}
+        />
+      </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">
-
-        {/* ── HEADING ── */}
+        {/* HEADING */}
         <div className="pt-32 pb-20 lg:pt-44 lg:pb-24">
-
           <div className="ss-meta mb-8 flex items-center gap-4 opacity-0">
             <div className="h-px w-5 bg-[#f7f704]" aria-hidden />
             <p
@@ -179,27 +182,20 @@ const services = categories.map((category, index) => ({
             </p>
           </div>
 
-          {/* Hero-taal */}
           <h1
             className="text-[clamp(56px,10vw,148px)] font-bold leading-[0.86] tracking-[-0.07em]"
             style={{ fontFamily: FONT }}
           >
-            {/* Signing — solid */}
             <div style={{ overflow: "hidden", display: "block" }}>
-              <span
-                className="ss-w1 block"
-                style={{ transform: "translateY(108%)", fontFamily: FONT }}
-              >
+              <span className="ss-w1 block" style={{ transform: "translateY(108%)" }}>
                 Signing
               </span>
             </div>
-            {/* die richting — outline */}
             <div style={{ overflow: "hidden", display: "block" }}>
               <span
                 className="ss-w2 block"
                 style={{
                   transform: "translateY(108%)",
-                  fontFamily: FONT,
                   WebkitTextStroke: "1.5px rgba(255,255,255,0.18)",
                   color: "transparent",
                 }}
@@ -207,60 +203,36 @@ const services = categories.map((category, index) => ({
                 die richting
               </span>
             </div>
-            {/* geeft. — solid + gele punt */}
             <div style={{ overflow: "hidden", display: "block" }}>
-              <span
-                className="ss-w3 block text-white"
-                style={{ transform: "translateY(108%)", fontFamily: FONT }}
-              >
+              <span className="ss-w3 block" style={{ transform: "translateY(108%)" }}>
                 geeft<span style={{ color: "#f7f704" }}>.</span>
               </span>
             </div>
           </h1>
         </div>
 
-        {/* ── SERVICE ROWS ── */}
+        {/* SERVICE ROWS — titels beginnen WIT, worden GEEL bij hover */}
         <div>
-          {services.map((service, i) => (
+          {services.map((service, idx) => (
             <Link
               key={service.id}
               href={service.href}
-              className="ss-row group relative block overflow-hidden"
+              className={`ss-row group relative block overflow-hidden`}
+              onMouseEnter={() => setActiveIndex(idx)}
+              onMouseLeave={() => setActiveIndex(null)}
             >
-              {/* Fullscreen image — revealed on hover */}
-              <div
-                className="ss-img-wrap pointer-events-none absolute inset-0 z-[1]"
-                style={{ clipPath: "inset(0 100% 0 0)" }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={service.image}
-                  alt={service.title}
-                  className="ss-img absolute inset-0 h-full w-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/55" />
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background: "linear-gradient(90deg, rgba(0,0,0,0.7) 0%, transparent 60%)",
-                  }}
-                />
-              </div>
-
               {/* Border top */}
-              <div
-                className="ss-border absolute left-0 right-0 top-0 h-px origin-left bg-white/[0.07]"
-              />
+              <div className="ss-border absolute left-0 right-0 top-0 h-px origin-left bg-white/[0.06]" />
 
               {/* Ghost number */}
               <div
                 aria-hidden
-                className="ss-ghost pointer-events-none absolute right-0 top-0 select-none leading-none tracking-[-0.07em]"
+                className="ss-ghost pointer-events-none absolute right-0 top-0 select-none leading-none tracking-[-0.07em] transition-all duration-700 group-hover:-translate-y-4"
                 style={{
                   fontFamily: FONT,
                   fontSize: "clamp(80px,12vw,180px)",
                   fontWeight: 700,
-                  color: "rgba(255,255,255,0.04)",
+                  color: "rgba(255,255,255,0.03)",
                   lineHeight: 1,
                   zIndex: 0,
                 }}
@@ -268,27 +240,28 @@ const services = categories.map((category, index) => ({
                 {service.id}
               </div>
 
-              {/* Row content */}
-              <div className="relative z-[2] flex items-center justify-between py-8 lg:py-10">
-
-                {/* Left */}
+              {/* Content */}
+              <div className="relative z-[2] flex items-center justify-between py-10 lg:py-12">
                 <div className="flex items-center gap-6 lg:gap-10">
+                  {/* Nummer — wordt geel bij hover */}
                   <span
-                    className="w-8 text-[10px] tabular-nums tracking-[0.2em] text-white/25 transition-colors duration-300 group-hover:text-[#f7f704]"
+                    className="w-8 text-[10px] tabular-nums tracking-[0.2em] text-white/40 transition-all duration-500 group-hover:text-[#f7f704]"
                     style={{ fontFamily: FONT }}
                   >
                     {service.id}
                   </span>
 
                   <div>
+                    {/* Titel — BEGINT WIT (geen outline) → wordt GEEL bij hover */}
                     <h2
-                      className="ss-title text-[clamp(28px,4.5vw,64px)] font-bold leading-none tracking-[-0.055em] text-white"
+                      className="text-[clamp(32px,5vw,72px)] font-bold leading-none tracking-[-0.055em] text-white transition-all duration-500 group-hover:text-[#f7f704]"
                       style={{ fontFamily: FONT }}
                     >
                       {service.title}
                     </h2>
+                    {/* Subtitel — blijft leesbaar, wordt iets helderder bij hover */}
                     <p
-                      className="mt-1.5 text-[11px] uppercase tracking-[0.2em] text-white/28 transition-colors duration-300 group-hover:text-white/50"
+                      className="mt-2 text-[12px] uppercase tracking-[0.2em] text-white/35 transition-all duration-500 group-hover:text-white/60"
                       style={{ fontFamily: FONT }}
                     >
                       {service.sub}
@@ -296,28 +269,26 @@ const services = categories.map((category, index) => ({
                   </div>
                 </div>
 
-                {/* Arrow — slides in on hover */}
+                {/* Arrow */}
                 <div
-                  className="ss-arrow flex h-10 w-10 items-center justify-center rounded-full bg-[#f7f704] text-black opacity-0"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f7f704] text-black opacity-0 transition-all duration-500 group-hover:opacity-100"
                   style={{ transform: "translateX(-8px)" }}
                 >
                   <ArrowUpRight size={16} weight="bold" />
                 </div>
-
               </div>
 
-              {/* Border bottom on last item */}
-              {i === services.length - 1 && (
-                <div className="absolute bottom-0 left-0 right-0 h-px bg-white/[0.07]" />
+              {/* Bottom border */}
+              {idx === services.length - 1 && (
+                <div className="absolute bottom-0 left-0 right-0 h-px bg-white/[0.06]" />
               )}
             </Link>
           ))}
         </div>
 
-        {/* ── BOTTOM CTA ── */}
+        {/* CTA */}
         <div className="py-32 lg:py-44">
           <div className="flex flex-col items-start justify-between gap-10 border-t border-white/[0.06] pt-16 lg:flex-row lg:items-end">
-
             <div>
               <p
                 className="mb-4 text-[10px] uppercase tracking-[0.28em] text-white/28"
@@ -335,7 +306,6 @@ const services = categories.map((category, index) => ({
                   style={{
                     WebkitTextStroke: "1.5px rgba(255,255,255,0.18)",
                     color: "transparent",
-                    fontFamily: FONT,
                   }}
                 >
                   zichtbaarheid
@@ -364,10 +334,8 @@ const services = categories.map((category, index) => ({
                 Reactie binnen 1 werkdag
               </p>
             </div>
-
           </div>
         </div>
-
       </div>
     </section>
   )

@@ -1,4 +1,3 @@
-// client/sanity/lib/serviceQueries.ts
 import { groq } from "next-sanity"
 
 /**
@@ -28,11 +27,15 @@ export const serviceBySlugQuery = groq`
     _type == "categoryHeroSection" => {
       _type,
       title,
-      subtitle,
-      overlay,
-      backgroundImage {
+      tagline,
+      description,
+      image {
         alt,
-        asset->{ url }
+        "url": asset->url
+      },
+      stats[] {
+        value,
+        label
       }
     },
 
@@ -59,6 +62,97 @@ export const serviceBySlugQuery = groq`
       }
     },
 
+    _type == "subServiceSelectorSection" => {
+      _type,
+      label,
+      title,
+        "debugCount": count(items),
+
+      items[]-> {
+        "id": _id,
+        num,
+        title,
+        "categorySlug": parentServices[0]->parentSubcategory->parentCategory->slug.current,
+        previewProject,
+        previewYear,
+        description,
+        "imageUrl": image.asset->url,
+        advantages,
+        materials,
+        specifications,
+        processSteps,
+        layerSections[] {
+          _type,
+          title,
+          text,
+          label,
+          bulletPoints,
+          imagePosition,
+          image {
+            alt,
+            "url": asset->url
+          },
+          // 1. UITVOERINGEN DATA
+          styles[] {
+            num,
+            title,
+            description,
+            image {
+              alt,
+              "url": asset->url
+            }
+          },
+          // 2. MATERIALEN DATA IN POP-UP
+          materials[] {
+            title,
+            description,
+            textureImage {
+              alt,
+              "url": asset->url
+            }
+          },
+          // 3. PROJECTEN PORTFOLIO DATA
+          projects[]-> {
+            "title": projectName,
+            "slug": slug.current,
+            "imageUrl": featuredImage.asset->url,
+            "client": client.name,
+            "year": string::split(projectDate, "-")[0]
+          },
+          steps[] { title, text },
+          items[] { title, text, question, answer },
+          
+          // ==========================================
+          // 4. VERBETERDE CTA DATA VOOR IN DE POP-UP
+          // ==========================================
+          _type == "ctaSection" => {
+            title,
+            text,
+            buttonLabel,
+            buttonLink,
+            secondaryButtonLabel,
+            secondaryButtonLink,
+            bullets
+          },
+
+          // ==========================================
+          // 5. GERELATEERDE SUB-SERVICES DATA
+          // ==========================================
+          services[]-> {
+            _id,
+            title,
+            shortDescription,
+            slug { current },
+            image {
+              alt,
+              asset->{ url }
+            }
+          }
+          // ==========================================
+        }
+      }
+    },
+
     _type == "processSection" => {
       _type,
       label,
@@ -67,6 +161,20 @@ export const serviceBySlugQuery = groq`
       steps[] {
         title,
         text
+      }
+    },
+
+    // JOUW HOOFDPAGINA PORTFOLIO DATA HIER INGEBOUWD 🎉
+    _type == "makyPopupPortfolio" => {
+      _type,
+      label,
+      title,
+      projects[]-> {
+        "title": projectName,
+        "slug": slug.current,
+        "imageUrl": featuredImage.asset->url,
+        "client": client.name,
+        "year": string::split(projectDate, "-")[0]
       }
     },
 

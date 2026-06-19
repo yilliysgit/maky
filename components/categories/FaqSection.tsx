@@ -1,71 +1,127 @@
-"use client"
+"use client";
 
-// components/categories/FaqSection.tsx
-import { useState } from 'react'
+import { useState } from "react";
 
 type FaqItem = {
-  question: string
-  answer: string
-}
+  question: string;
+  answer: string;
+};
 
 type Props = {
-  title?: string | null
-  intro?: string | null
-  items: FaqItem[]
-  color?: string | null
-}
+  label?: string | null;
+  title?: string | null;
+  intro?: string | null;
+  items: FaqItem[];
+  color?: string | null;
+};
 
-export function FaqSection({ title, intro, items, color }: Props) {
-  const [open, setOpen] = useState<number | null>(null)
+export function FaqSection({
+  label,
+  title,
+  intro,
+  items,
+  color,
+}: Props) {
+  const [open, setOpen] = useState<number | null>(0);
 
-  if (!items?.length) return null
+  const accent = color ?? "#f7f704";
+
+  if (!items?.length) return null;
 
   return (
-    <div className="flex flex-col gap-8">
-      {/* Header */}
-      <div>
-        {title && (
-          <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
-            {title}
-          </h2>
-        )}
-        {intro && (
-          <p className="mt-3 text-white/50 leading-relaxed">
-            {intro}
-          </p>
-        )}
-      </div>
+    <section className="bg-[#080808] py-32 md:py-44">
+      <div className="mx-auto max-w-7xl px-6 lg:px-10">
 
-      {/* Accordion */}
-      <div className="divide-y divide-white/10">
-        {items.map((item, index) => (
-          <div key={index} className="py-5">
-            <button
-              onClick={() => setOpen(open === index ? null : index)}
-              className="w-full flex items-start justify-between gap-6 text-left group"
-            >
-              <span className="text-white font-medium group-hover:text-white/80 transition-colors leading-snug">
-                {item.question}
+        {/* Header */}
+        <div className="mb-24 max-w-4xl">
+          {label && (
+            <div className="mb-6 flex items-center gap-4">
+              <div
+                className="h-px w-6"
+                style={{ backgroundColor: accent }}
+              />
+
+              <span className="text-[10px] uppercase tracking-[0.3em] text-white/35">
+                {label}
               </span>
-              <span
-                className="shrink-0 mt-0.5 text-lg transition-transform duration-300"
-                style={{
-                  color: color ?? '#f7f704',
-                  transform: open === index ? 'rotate(45deg)' : 'none',
-                }}
+            </div>
+          )}
+
+          {title && (
+            <h2 className="text-[clamp(3rem,6vw,6rem)] font-bold leading-[0.9] tracking-[-0.06em] text-white">
+              {title}
+            </h2>
+          )}
+
+          {intro && (
+            <p className="mt-8 max-w-xl text-white/45 leading-relaxed">
+              {intro}
+            </p>
+          )}
+        </div>
+
+        {/* FAQ */}
+        <div className="border-t border-white/10">
+          {items.map((item, index) => {
+            const isOpen = open === index;
+
+            return (
+              <div
+                key={index}
+                className="border-b border-white/10"
               >
-                +
-              </span>
-            </button>
+                <button
+                  onClick={() =>
+                    setOpen(isOpen ? null : index)
+                  }
+                  className="group flex w-full items-start gap-6 py-10 text-left"
+                >
+                  {/* Nummer */}
+                  <div className="w-16 shrink-0">
+                    <span className="text-2xl font-black text-white/15 transition-colors duration-300 group-hover:text-white">
+                      {(index + 1)
+                        .toString()
+                        .padStart(2, "0")}
+                    </span>
+                  </div>
 
-            {open === index && (
-              <p className="mt-4 text-white/50 leading-relaxed text-sm pr-8">
-                {item.answer}
-              </p>
-            )}
-          </div>
-        ))}
+                  {/* Vraag */}
+                  <div className="flex-1">
+                    <h3 className="text-2xl font-bold tracking-[-0.03em] text-white">
+                      {item.question}
+                    </h3>
+
+                    <div
+                      className={`overflow-hidden transition-all duration-500 ${
+                        isOpen
+                          ? "mt-6 max-h-[300px]"
+                          : "max-h-0"
+                      }`}
+                    >
+                      <p className="max-w-3xl text-white/50 leading-relaxed">
+                        {item.answer}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Plus */}
+                  <div
+                    className="text-3xl font-light transition-transform duration-300"
+                    style={{
+                      color: accent,
+                      transform: isOpen
+                        ? "rotate(45deg)"
+                        : "rotate(0deg)",
+                    }}
+                  >
+                    +
+                  </div>
+                </button>
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </div>
-  )
+    </section>
+  );
 }

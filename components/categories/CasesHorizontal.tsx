@@ -36,12 +36,11 @@ interface CasesHorizontalProps {
 export default function CasesHorizontal({ data }: CasesHorizontalProps) {
   const sectionRef = useRef<HTMLElement>(null)
   const trackRef   = useRef<HTMLDivElement>(null)
+  const introRef   = useRef<HTMLDivElement>(null)
 
   const projects    = data?.items ?? []
-  const totalPanels = projects.length + 1  // + CTA
-  // Exact zelfde formule als origineel: 4 panels = -80%, 5 panels = -80% etc
-  // Origineel: 4 project panels + 1 CTA = 5 panels, xPercent = -80
-  // Formule: -(totalPanels - 1) / totalPanels * 100
+  const totalPanels = projects.length + 1
+  
   const xPercent    = -Math.round((totalPanels - 1) / totalPanels * 100)
   const trackWidth  = `${totalPanels * 100}vw`
   const minHeight   = `${totalPanels * 100}vh`
@@ -55,19 +54,21 @@ export default function CasesHorizontal({ data }: CasesHorizontalProps) {
     if (!sectionRef.current || !trackRef.current || !projects.length) return
 
     const ctx = gsap.context(() => {
+      const introHeight = introRef.current?.offsetHeight || 0
 
-      // EXACT zelfde als origineel — geen pin, sticky via CSS
+      // De horizontale scroll-tween
       const scrollTween = gsap.to(trackRef.current, {
         xPercent,
         ease: "none",
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top top",
+          start: `top+=${introHeight} top`,
           end: "bottom bottom",
           scrub: 1,
         },
       })
 
+      // Parallax en content animaties
       gsap.utils.toArray<HTMLElement>(".case-panel").forEach((panel, i) => {
         const image   = panel.querySelector(".case-image")
         const content = panel.querySelector(".case-content")
@@ -97,7 +98,8 @@ export default function CasesHorizontal({ data }: CasesHorizontalProps) {
                 scrollTrigger: {
                   trigger: panel,
                   containerAnimation: scrollTween,
-                  start: "left 70%", end: "center center",
+                  start: "left 115%",
+                  end: "left 65%",
                   scrub: 1,
                 },
               }
@@ -120,12 +122,12 @@ export default function CasesHorizontal({ data }: CasesHorizontalProps) {
         }
       })
 
-      gsap.fromTo(".cases-intro",
+      gsap.fromTo(introRef.current,
         { opacity: 0, y: 40 },
         {
           opacity: 1, y: 0, duration: 1, ease: "power3.out",
           scrollTrigger: {
-            trigger: ".cases-intro",
+            trigger: introRef.current,
             start: "top 88%",
             toggleActions: "play none none reverse",
           },
@@ -140,11 +142,11 @@ export default function CasesHorizontal({ data }: CasesHorizontalProps) {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#080808] text-white"
+      className="relative bg-[#080808] text-white pt-0"
       style={{ minHeight }}
     >
-      {/* INTRO */}
-      <div className="cases-intro relative z-20 px-6 pb-24 pt-32 lg:px-10">
+      {/* INTRO - pb-0 want de sticky viewport heeft eigen spacing */}
+      <div ref={introRef} className="cases-intro relative z-20 px-6 pb-0 lg:px-10">
         <div className="max-w-5xl">
           <div className="mb-6 flex items-center gap-4">
             <div className="h-px w-5 bg-[#f7f704]" />
@@ -161,8 +163,8 @@ export default function CasesHorizontal({ data }: CasesHorizontalProps) {
         </div>
       </div>
 
-      {/* STICKY VIEWPORT — CSS sticky, geen GSAP pin */}
-      <div className="sticky top-0 h-screen overflow-hidden">
+      {/* STICKY VIEWPORT — top-[80px] voor de header, maar we passen aan voor consistente spacing */}
+      <div className="sticky top-[80px] h-[calc(100vh-80px)] overflow-hidden">
         <div
           className="pointer-events-none absolute left-0 top-0 z-20 h-32 w-full"
           style={{ background: "linear-gradient(to bottom, #080808, transparent)" }}
@@ -177,7 +179,7 @@ export default function CasesHorizontal({ data }: CasesHorizontalProps) {
             return (
               <article
                 key={project._id}
-                className="case-panel relative h-screen w-screen shrink-0 overflow-hidden"
+                className="case-panel relative h-full w-screen shrink-0 overflow-hidden"
               >
                 <div className="absolute inset-0 overflow-hidden">
                   <div className="case-image absolute inset-0">
@@ -206,8 +208,9 @@ export default function CasesHorizontal({ data }: CasesHorizontalProps) {
                     {String(i + 1).padStart(2, "0")}
                     {project.subcategory?.title ? ` / ${project.subcategory.title}` : ""}
                   </p>
+                  
                   <h3
-                    className="mt-4 text-5xl font-bold leading-[0.88] tracking-[-0.06em] text-white md:text-7xl lg:text-8xl"
+                    className="mt-4 text-4xl font-bold leading-[0.9] tracking-[-0.04em] text-white md:text-5xl lg:text-6xl"
                     style={{ fontFamily: FONT }}
                   >
                     {project.projectName}
@@ -219,7 +222,7 @@ export default function CasesHorizontal({ data }: CasesHorizontalProps) {
           })}
 
           {/* CTA PANEL */}
-          <article className="relative flex h-screen w-screen shrink-0 items-center justify-center overflow-hidden bg-[#080808]">
+          <article className="relative flex h-full w-screen shrink-0 items-center justify-center overflow-hidden bg-[#080808]">
             <div className="absolute inset-0" style={{
               backgroundImage: "linear-gradient(to right, rgba(255,255,255,.022) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,.022) 1px, transparent 1px)",
               backgroundSize: "72px 72px",

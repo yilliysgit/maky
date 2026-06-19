@@ -37,6 +37,7 @@ interface ProcessSectionProps {
   data?: ProcessData | null
 }
 
+
 // Iconen per stap — volgorde matcht steps array
 const ICONS = [ChatsCircle, PencilSimple, Factory, Wrench]
 
@@ -124,7 +125,7 @@ export default function ProcessSection({ data }: ProcessSectionProps) {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#080808] py-32 text-white md:py-52"
+      className="relative bg-[#080808] pt-0 pb-32 text-white md:pb-52"
       style={{ overflow: "visible" }}
     >
       {/* Glow */}

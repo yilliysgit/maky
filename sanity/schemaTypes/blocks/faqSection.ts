@@ -11,7 +11,17 @@ export default defineType({
     collapsed: true,
   },
 
+  
+
   fields: [
+
+    defineField({
+  name: "label",
+  title: "Label",
+  type: "string",
+  description: "Bijv. 'Veelgestelde vragen'",
+}),
+
     defineField({
       name: "title",
       title: "Titel",

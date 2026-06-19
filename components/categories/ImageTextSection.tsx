@@ -51,20 +51,23 @@ export function ImageTextSection({
                 {text}
               </p>
             )}
-
-            {bulletPoints && bulletPoints.length > 0 && (
-              <ul className="mt-8 space-y-4">
-                {bulletPoints.map((point, i) => (
-                  <li key={i} className="flex items-start gap-4">
-                    <span
-                      className="mt-2 h-1.5 w-1.5 rounded-full shrink-0"
-                      style={{ backgroundColor: color ?? '#f7f704' }}
-                    />
-                    <span className="text-white/70 leading-relaxed">{point}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
+{bulletPoints && bulletPoints.length > 0 && (
+  <ul className="mt-10 space-y-5">
+    {bulletPoints.map((point, i) => (
+      <li key={i} className="flex items-start gap-4">
+        {/* Het minimalistische MAKY-stipje in de accentkleur */}
+        <span
+          className="mt-2.5 h-1.5 w-1.5 rounded-full shrink-0"
+          style={{ backgroundColor: color ?? '#f7f704' }}
+        />
+        {/* Heldere, grotere tekst voor maximale leesbaarheid */}
+        <span className="text-neutral-200 text-lg md:text-xl font-light tracking-wide leading-tight">
+          {point}
+        </span>
+      </li>
+    ))}
+  </ul>
+)}
 
             {cta?.label && cta?.url && (
               <Link

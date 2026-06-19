@@ -38,14 +38,18 @@ export default defineType({
       validation: (Rule) => Rule.max(160),
     }),
 
-    defineField({
-      name: "parentSubcategory",
-      title: "Bovenliggende subcategorie",
+ defineField({
+  name: "parentSubcategories",
+  title: "Bovenliggende subcategorieën",
+  type: "array",
+  group: "content",
+  of: [
+    {
       type: "reference",
-      group: "content",
       to: [{ type: "subcategory" }],
-      validation: (Rule) => Rule.required(),
-    }),
+    },
+  ],
+}),
 
     defineField({
       name: "image",
@@ -68,7 +72,12 @@ export default defineType({
         { type: "categoryHeroSection" },
         { type: "categoryIntroSection" },
         { type: "imageTextSection" },
+        { type: "subServiceSelectorSection" }, 
         { type: "processSection" },
+        
+        // HIER TOEGEVOEGD: NU KLIKBAAR IN DE STUDIO DROPDOWN! 🚀
+        { type: "makyPopupPortfolio" }, 
+
         { type: "uspSection" },
         { type: "faqSection" },
         { type: "ctaSection" },

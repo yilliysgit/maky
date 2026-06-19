@@ -50,17 +50,18 @@ export const categoryBySlugQuery = groq`
     _type,
 
     // ===== HERO =====
-    _type == "categoryHeroSection" => {
+ _type == "categoryHeroSection" => {
       _type,
       title,
-      subtitle,
+      // We mappen 'tagline' uit je schema naar 'subtitle' voor het component
+      "subtitle": tagline,
       description,
-      overlay,
-      backgroundImage {
-        alt,
-        asset->{ url }
-      }
+      
+      // HIER ZIT DE FIX: we pakken 'image' uit het schema en hernoemen het naar imageUrl
+      "imageUrl": image.asset->url,
+      "imageAlt": image.alt
     },
+    
 
     // ===== INTRO =====
     _type == "categoryIntroSection" => {

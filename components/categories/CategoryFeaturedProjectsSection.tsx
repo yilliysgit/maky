@@ -21,10 +21,11 @@ type Project = {
 };
 
 type Props = {
-  label?: string;
-  title?: string;
-  intro?: string;
-  projects: Project[];
+  label?: string | null;
+  title?: string | null;
+  intro?: string | null;
+  projects?: any[];
+  color?: string | null;  // ← TOEVOEGEN
 };
 
 export function CategoryFeaturedProjectsSection({
@@ -32,6 +33,7 @@ export function CategoryFeaturedProjectsSection({
   title,
   intro,
   projects,
+  color = "#f7f704",  // ← fallback
 }: Props) {
   if (!projects?.length) return null;
 

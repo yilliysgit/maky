@@ -33,12 +33,14 @@ export const homepageQuery = groq`
     ctaTitle,
     ctaText
   },
-  cta {
-    heading,
-    subtext,
-    trust,
-    primaryLabel,
-    secondaryLabel
-  }
+cta {
+  heading,
+  subtext,
+  trust,
+  primaryLabel,
+  primaryLink,    // 👈 VOEG DIT TOE
+  secondaryLabel,
+  secondaryLink   // 👈 VOEG DIT TOE
+}
 }
 `

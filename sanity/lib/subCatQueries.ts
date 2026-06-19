@@ -21,17 +21,21 @@ export const subcategoryBySlugQuery = groq`
     color
   },
 
-  sections[] {
+ sections[] {
     _type,
 
     _type == "categoryHeroSection" => {
       _type,
       title,
-      subtitle,
-      overlay,
-      backgroundImage {
+      tagline,
+      description,
+      image {
         alt,
-        asset->{ url }
+        "url": asset->url
+      },
+      stats[] {
+        value,
+        label
       }
     },
 
@@ -72,6 +76,21 @@ export const subcategoryBySlugQuery = groq`
       }
     },
 
+_type == "materialSamplesSection" => {
+      _type,
+      title,
+      label,
+      materials[] {
+        _key,
+        title,
+        description,
+        textureImage {
+          "url": asset->url,
+          alt
+        }
+      }
+    },
+
     _type == "processSection" => {
       _type,
       label,
@@ -103,6 +122,24 @@ export const subcategoryBySlugQuery = groq`
         answer
       }
     },
+
+_type == "relatedServicesSection" => {
+  _type,
+  label,
+  title,
+  intro,
+  // We halen de sub-services op en zetten de data direct goed klaar
+  services[]->{
+    "id": _id, // Handig voor onze interne pop-up switch!
+    title,
+    shortDescription,
+    slug { current }, // Zorgt dat slug.current werkt
+    image {
+      alt,
+      asset->{ url }
+    }
+  }
+},
 
     _type == "ctaSection" => {
       _type,

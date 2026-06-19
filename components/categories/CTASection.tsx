@@ -19,11 +19,14 @@ interface CTAData {
   subtext?: string
   trust?: string[]
   primaryLabel?: string
+  primaryLink?: string    // ← TOEGEVOEGD
   secondaryLabel?: string
+  secondaryLink?: string  // ← TOEGEVOEGD
 }
 
 interface CTASectionProps {
   data?: CTAData | null
+  color?: string | null  // ← TOEGEVOEGD voor category kleur
 }
 
 const FALLBACK: CTAData = {
@@ -38,60 +41,54 @@ const FALLBACK: CTAData = {
 // COMPONENT
 // ─────────────────────────────────────────────────────────────
 
-export default function CTASection({ data }: CTASectionProps) {
+export default function CTASection({ data, color = "#f7f704" }: CTASectionProps) {
   const d = { ...FALLBACK, ...data, trust: data?.trust?.length ? data.trust : FALLBACK.trust }
+  const accentColor = color ?? "#f7f704"
 
   const sectionRef = useRef<HTMLElement>(null)
 
-  useEffect(() => {
+useEffect(() => {
     if (!sectionRef.current) return
 
     const ctx = gsap.context(() => {
+      // We halen ScrollTrigger hier weg, of we voegen de juiste scroller toe
+      // Om het 100% werkend te krijgen in popups animeren we direct met een subtiele delay:
       gsap.fromTo(".cta-heading",
         { opacity: 0, y: 40 },
-        {
-          opacity: 1, y: 0, duration: 1.2, ease: "power3.out",
-          scrollTrigger: { trigger: ".cta-heading", start: "top 85%", toggleActions: "play none none reverse" },
-        }
+        { opacity: 1, y: 0, duration: 1.2, ease: "power3.out", delay: 0.2 }
       )
       gsap.fromTo(".cta-border",
         { scaleX: 0, transformOrigin: "left center" },
-        {
-          scaleX: 1, duration: 1.4, ease: "power3.inOut",
-          scrollTrigger: { trigger: ".cta-border", start: "top 88%", toggleActions: "play none none reverse" },
-        }
+        { scaleX: 1, duration: 1.4, ease: "power3.inOut", delay: 0.4 }
       )
       gsap.fromTo(".cta-bottom",
         { opacity: 0, y: 24 },
-        {
-          opacity: 1, y: 0, duration: 0.9, ease: "power3.out",
-          scrollTrigger: { trigger: ".cta-bottom", start: "top 88%", toggleActions: "play none none reverse" },
-        }
+        { opacity: 1, y: 0, duration: 0.9, ease: "power3.out", delay: 0.5 }
       )
     }, sectionRef)
 
     return () => ctx.revert()
   }, [])
 
+
   // Split heading voor solid + outline effect
   const words     = (d.heading ?? "").split(" ")
   const midpoint  = Math.ceil(words.length / 2)
   const line1     = words.slice(0, midpoint).join(" ")
   const line2rest = words.slice(midpoint)
-  // Laatste woord krijgt gele punt
   const line2main = line2rest.slice(0, -1).join(" ")
   const line2last = line2rest.slice(-1)[0] ?? ""
 
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#080808] py-40 text-white md:py-56"
+      className="relative bg-[#080808] py-40 text-white md:py-0"
     >
-      {/* Glow */}
+      {/* Glow — met category kleur */}
       <div
         aria-hidden
         className="pointer-events-none absolute left-1/2 top-1/2 h-[900px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full"
-        style={{ background: "radial-gradient(circle, rgba(247,247,4,0.05), transparent 70%)" }}
+        style={{ background: `radial-gradient(circle, ${accentColor}0a, transparent 70%)` }}
       />
 
       {/* Grid */}
@@ -120,7 +117,7 @@ export default function CTASection({ data }: CTASectionProps) {
         {/* HEADING */}
         <div className="cta-heading max-w-5xl">
           <div className="mb-8 flex items-center gap-4">
-            <div className="h-px w-5 bg-[#f7f704]" aria-hidden />
+            <div className="h-px w-5" style={{ backgroundColor: accentColor }} aria-hidden />
             <p className="text-[10px] uppercase tracking-[0.28em] text-white/28" style={{ fontFamily: FONT }}>
               Klaar om te starten
             </p>
@@ -132,17 +129,17 @@ export default function CTASection({ data }: CTASectionProps) {
           >
             {line1}
             <br />
-            <span style={{ WebkitTextStroke: "1.5px rgba(255,255,255,0.18)", color: "transparent", fontFamily: FONT }}>
+            <span style={{ WebkitTextStroke: `1.5px ${accentColor}`, color: "transparent", fontFamily: FONT }}>
               {line2main}
             </span>
             {line2main ? " " : ""}
             {line2last.replace(".", "")}
-            <span style={{ color: "#f7f704" }}>.</span>
+            <span style={{ color: accentColor }}>.</span>
           </h2>
         </div>
 
         {/* BORDER */}
-        <div className="cta-border mt-20 h-px w-full origin-left bg-white/[0.07]" />
+        <div className="cta-border mt-20 h-px w-full origin-left" style={{ backgroundColor: `${accentColor}12` }} />
 
         {/* BOTTOM */}
         <div className="cta-bottom mt-12 flex flex-col items-start justify-between gap-12 lg:flex-row lg:items-end">
@@ -156,7 +153,7 @@ export default function CTASection({ data }: CTASectionProps) {
             <div className="mt-8 flex flex-wrap gap-x-8 gap-y-3">
               {(d.trust ?? []).map((item) => (
                 <div key={item} className="flex items-center gap-2">
-                  <div className="h-px w-4 bg-[#f7f704]" aria-hidden />
+                  <div className="h-px w-4" style={{ backgroundColor: accentColor }} aria-hidden />
                   <span className="text-[10px] uppercase tracking-[0.22em] text-white/35" style={{ fontFamily: FONT }}>
                     {item}
                   </span>
@@ -169,25 +166,25 @@ export default function CTASection({ data }: CTASectionProps) {
           <div className="flex flex-col gap-5">
             <div className="flex items-center gap-4">
               <Link
-                href="/contact"
-                className="group inline-flex items-center gap-3 rounded-full bg-[#f7f704] px-8 py-[14px] text-[11px] font-bold tracking-[0.04em] text-black transition-all duration-300 hover:scale-[1.03] hover:bg-white"
-                style={{ fontFamily: FONT }}
-              >
-                {d.primaryLabel}
-                <ArrowUpRight size={16} weight="bold" className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </Link>
+  href={data?.primaryLink || "/contact"} // Luistert naar Sanity, anders fallback naar /contact
+  className="group inline-flex items-center gap-3 rounded-full px-8 py-[14px] text-[11px] font-bold tracking-[0.04em] text-black transition-all duration-300 hover:scale-[1.03] hover:bg-white"
+  style={{ fontFamily: FONT, backgroundColor: accentColor }}
+>
+  {d.primaryLabel}
+  <ArrowUpRight size={16} weight="bold" className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+</Link>
 
-              <Link
-                href="/contact?type=advies"
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 px-6 py-[14px] text-[11px] font-medium text-white/50 transition-all duration-300 hover:border-white/35 hover:text-white"
-                style={{ fontFamily: FONT }}
-              >
-                {d.secondaryLabel}
-              </Link>
+<Link
+  href={data?.secondaryLink || "/contact?type=advies"} // Luistert naar Sanity, anders fallback
+  className="inline-flex items-center gap-2 rounded-full border border-white/15 px-6 py-[14px] text-[11px] font-medium text-white/50 transition-all duration-300 hover:border-white/35 hover:text-white"
+  style={{ fontFamily: FONT }}
+>
+  {d.secondaryLabel}
+</Link>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="h-px w-4 bg-white/15" aria-hidden />
+              <div className="h-px w-4" style={{ backgroundColor: `${accentColor}40` }} aria-hidden />
               <p className="text-[9px] uppercase tracking-[0.22em] text-white/22" style={{ fontFamily: FONT }}>
                 Reactie binnen 1 werkdag
               </p>

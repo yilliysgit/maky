@@ -14,8 +14,8 @@ const FALLBACK: HomepageIntro = {
   heading:    "De sterkste merken herken je direct.",
   subtitle:   "MAKY — Visual Signing",
   title:      "MAKY: specialist in visual signing voor binnen en buiten",
-  paragraph1: "MAKY is gespecialiseerd in hoogwaardige visual signing voor bedrijven, architecten en organisaties. Wij ontwerpen, produceren en monteren signing-oplossingen voor gevels, interieurs en openbare ruimtes.",
-  paragraph2: "Van architecturale gevelreclame en wayfinding tot complete interieurbranding: MAKY begeleidt projecten van concept en engineering tot productie en montage. Dankzij eigen productie behouden wij controle over kwaliteit, planning en uitvoering.",
+  paragraph1: "MAKY is gespecialiseerd in hoogwaardige visual signing voor bedrijven, architecten en organisaties. Wij ontwerpen, produceen en monteren signing-oplossingen voor gevels, interieurs en openbare ruimtes.",
+  paragraph2: "Van architecturale gevelreclame networks en wayfinding tot complete interieurbranding: MAKY begeleidt projecten van concept en engineering tot productie en montage. Dankzij eigen productie behouden wij controle over kwaliteit, planning en uitvoering.",
 }
 
 interface IntroRevealProps {
@@ -46,17 +46,17 @@ export default function IntroReveal({ data }: IntroRevealProps) {
         if (split.words?.length) {
           gsap.fromTo(
             split.words,
-            { color: "rgba(255,255,255,0.08)" },
+            { color: "rgba(255, 255, 255, 0.06)" },
             {
-              color: "rgba(255,255,255,1)",
+              color: "rgba(255, 255, 255, 1)",
               ease: "none",
               stagger: { each: 0.18, from: "start" },
               scrollTrigger: {
                 id: "intro-heading",
                 trigger: headingRef.current,
-                start: "top 80%",
-                end: "bottom 30%",
-                scrub: 1.4,
+                start: "top 78%",
+                end: "bottom 35%",
+                scrub: 1.2,
               },
             }
           )
@@ -84,10 +84,13 @@ export default function IntroReveal({ data }: IntroRevealProps) {
       if (subtitleRef.current) {
         gsap.fromTo(
           subtitleRef.current,
-          { opacity: 0, x: -24, filter: "blur(4px)" },
+          { opacity: 0, x: -20, filter: "blur(3px)" },
           {
-            opacity: 1, x: 0, filter: "blur(0px)",
-            duration: 0.9, ease: "power3.out",
+            opacity: 1,
+            x: 0,
+            filter: "blur(0px)",
+            duration: 0.9,
+            ease: "power3.out",
             scrollTrigger: {
               id: "intro-subtitle",
               trigger: subtitleRef.current,
@@ -107,10 +110,14 @@ export default function IntroReveal({ data }: IntroRevealProps) {
         if (titleSplit.lines?.length) {
           gsap.fromTo(
             titleSplit.lines,
-            { opacity: 0, y: 36, filter: "blur(3px)" },
+            { opacity: 0, y: 32, filter: "blur(3px)" },
             {
-              opacity: 1, y: 0, filter: "blur(0px)",
-              duration: 0.9, ease: "power3.out", stagger: 0.12,
+              opacity: 1,
+              y: 0,
+              filter: "blur(0px)",
+              duration: 0.9,
+              ease: "power3.out",
+              stagger: 0.12,
               scrollTrigger: {
                 id: "intro-title",
                 trigger: titleRef.current,
@@ -129,15 +136,18 @@ export default function IntroReveal({ data }: IntroRevealProps) {
         if (!pSplit.words?.length) return
         gsap.fromTo(
           pSplit.words,
-          { opacity: 0.12, y: 12 },
+          { opacity: 0.10, y: 10 },
           {
-            opacity: 1, y: 0, ease: "power2.out",
-            stagger: { each: 0.025, from: "start" },
+            opacity: 1,
+            y: 0,
+            ease: "power2.out",
+            stagger: { each: 0.02, from: "start" },
             scrollTrigger: {
               id: `intro-p-${idx}`,
               trigger: ref.current,
-              start: "top 88%", end: "bottom 55%",
-              scrub: 0.9,
+              start: "top 88%",
+              end: "bottom 58%",
+              scrub: 0.8,
             },
           }
         )
@@ -148,7 +158,8 @@ export default function IntroReveal({ data }: IntroRevealProps) {
         ".intro-grid",
         { opacity: 0 },
         {
-          opacity: 1, duration: 1.2,
+          opacity: 1,
+          duration: 1.4,
           scrollTrigger: {
             id: "intro-grid",
             trigger: sectionRef.current,
@@ -163,73 +174,83 @@ export default function IntroReveal({ data }: IntroRevealProps) {
     return () => ctx.revert()
   }, [])
 
+  // We knippen de eventuele harde punt van de Sanity heading af om hem handmatig te stylen
+// We zorgen dat heading altijd een string is (fallback naar lege string als het undefined is)
+  const headingText = d.heading ?? ""
+  const cleanHeading = headingText.endsWith(".") ? headingText.slice(0, -1) : headingText
+  
   return (
     <section
       ref={sectionRef}
-      className="relative z-30 overflow-hidden bg-[#080808] py-40 md:py-56"
+      className="relative z-30 w-full overflow-hidden bg-[#080808] py-32 md:py-48 clear-both block select-none"
     >
-      {/* Overgang vanuit hero */}
+      {/* Overgang vanuit de Hero component */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 z-[2] h-40"
+        className="pointer-events-none absolute inset-x-0 top-0 z-[2] h-32"
         style={{ background: "linear-gradient(to bottom, #080808 0%, transparent 100%)" }}
       />
 
-      {/* Grid */}
+      {/* Technisch Achtergrond Grid */}
       <div
         aria-hidden
         className="intro-grid pointer-events-none absolute inset-0 opacity-0"
         style={{
-          backgroundImage: "linear-gradient(to right, rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.025) 1px, transparent 1px)",
-          backgroundSize: "72px 72px",
+          backgroundImage: "linear-gradient(to right, rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.015) 1px, transparent 1px)",
+          backgroundSize: "80px 80px",
         }}
       />
 
-      {/* Orbs */}
-      <div aria-hidden className="pointer-events-none absolute -right-64 -top-64 h-[600px] w-[600px] rounded-full" style={{ background: "radial-gradient(circle, rgba(255,255,255,0.035), transparent 70%)" }} />
-      <div aria-hidden className="pointer-events-none absolute -bottom-64 -left-64 h-[600px] w-[600px] rounded-full" style={{ background: "radial-gradient(circle, rgba(255,255,255,0.025), transparent 70%)" }} />
+      {/* Subtiele Orbs voor diepte */}
+      <div aria-hidden className="pointer-events-none absolute -right-64 -top-64 h-[600px] w-[600px] rounded-full opacity-[0.4]" style={{ background: "radial-gradient(circle, rgba(247,247,4,0.015), transparent 70%)" }} />
+      <div aria-hidden className="pointer-events-none absolute -bottom-64 -left-64 h-[600px] w-[600px] rounded-full" style={{ background: "radial-gradient(circle, rgba(255,255,255,0.015), transparent 70%)" }} />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">
+      <div className="relative z-10 mx-auto max-w-7xl px-6 md:px-12">
 
-        {/* Grote heading */}
+        {/* Grote architectonische heading */}
         <div className="max-w-5xl">
           <h2
             ref={headingRef}
-            className="text-4xl font-semibold leading-[1.08] tracking-[-0.05em] md:text-6xl lg:text-7xl"
-            style={{ fontFamily: FONT, color: "rgba(255,255,255,0.08)" }}
+            className="text-[clamp(38px,6vw,84px)] font-black leading-[0.88] tracking-[-0.05em] uppercase text-white"
+            style={{ fontFamily: FONT }}
           >
-            {d.heading}
+            {cleanHeading}
+            <span className="text-[#f7f704] font-black">.</span>
           </h2>
         </div>
 
-        {/* Grid content */}
-        <div className="mt-28 grid gap-16 lg:grid-cols-12 lg:gap-8">
+        {/* Twee-koloms Grid content */}
+        <div className="mt-24 md:mt-32 grid gap-12 lg:grid-cols-12 lg:gap-16">
 
-          {/* Links */}
-          <div className="lg:col-span-4">
-            <div className="intro-border-line h-px w-full origin-left bg-white/[0.08]" />
-            <p
-              ref={subtitleRef}
-              className="mt-10 text-[11px] uppercase tracking-[0.26em] text-white/35"
-              style={{ fontFamily: FONT }}
-            >
-              {d.subtitle}
-            </p>
+          {/* Linkerkolom: Subtitle Indicator */}
+          <div className="lg:col-span-4 flex flex-col justify-start">
+            <div className="intro-border-line h-px w-full origin-left bg-white/[0.06]" />
+            <div className="mt-8 flex items-center gap-3">
+              <div className="h-px w-4 bg-[#f7f704]" aria-hidden />
+              <p
+                ref={subtitleRef}
+                className="text-[10px] uppercase tracking-[0.28em] text-white/35 font-medium"
+                style={{ fontFamily: FONT }}
+              >
+                {d.subtitle}
+              </p>
+            </div>
           </div>
 
-          {/* Rechts */}
-          <div className="lg:col-span-8">
-            <div className="intro-border-line h-px w-full origin-left bg-white/[0.08]" />
-            <div className="mt-10">
+          {/* Rechterkolom: Inhoud & Paragrafen */}
+          <div className="lg:col-span-8 flex flex-col justify-start">
+            <div className="intro-border-line h-px w-full origin-left bg-white/[0.06]" />
+            <div className="mt-8">
               <h3
                 ref={titleRef}
-                className="text-2xl font-semibold leading-snug tracking-[-0.04em] text-white md:text-3xl"
+                className="text-xl md:text-2xl font-bold leading-tight tracking-[-0.04em] uppercase text-white max-w-2xl"
                 style={{ fontFamily: FONT }}
               >
                 {d.title}
               </h3>
 
-              <div className="mt-10 space-y-7 text-[17px] leading-[1.75] text-white/48">
+              {/* Paragrafen ademen perfect met leading-relaxed */}
+              <div className="mt-8 space-y-6 text-[15px] md:text-[16px] font-light leading-relaxed text-neutral-400 max-w-2xl">
                 {d.paragraph1 && (
                   <p ref={p0Ref} style={{ fontFamily: FONT }}>{d.paragraph1}</p>
                 )}
@@ -239,6 +260,7 @@ export default function IntroReveal({ data }: IntroRevealProps) {
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </section>

@@ -1,134 +1,198 @@
-// app/(site)/diensten/[category]/[subcategory]/[service]/page.tsx
+// app/(site)/diensten/[category]/[subcategory]/page.tsx
 
-import { client } from "@/sanity/lib/client"
-import { serviceBySlugQuery } from "@/sanity/lib/serviceQueries"
+import { notFound } from "next/navigation";
 
-import { CategoryHero } from "@/components/categories/CategoryHero"
-import { CategoryIntroSection } from "@/components/categories/CategoryIntroSection"
-import { ImageTextSection } from "@/components/categories/ImageTextSection"
-import  ProcessSection  from "@/components/categories/ProcessSection"
-import { UspSection } from "@/components/categories/UspSection"
-import { FaqSection } from "@/components/categories/FaqSection"
-// import { CtaSection } from "@/components/categories/CTASection"
+import { client } from "@/sanity/lib/client";
+import { subcategoryBySlugQuery } from "@/sanity/lib/subCatQueries";
 
-type PageProps = {
+import { SubCategoryHero } from "@/components/categories/hero/SubCategoryHero";
+import { ImageTextSection } from "@/components/categories/ImageTextSection";
+import UspSection from "@/components/categories/UspSection";
+import { CategoryIntroSection } from "@/components/categories/CategoryIntroSection";
+import { CategoryServiceListSection } from "@/components/categories/CategoryServiceListSection";
+import ProcessSection from "@/components/categories/ProcessSection";
+import { FaqSection } from "@/components/categories/FaqSection";
+import CategoryRelatedServicesSection from "@/components/categories/CategoryRelatedServicesSection";
+import CTASection from "@/components/categories/CTASection";
+
+
+type Props = {
   params: Promise<{
-    category: string
-    subcategory: string
-    service: string
-  }>
-}
+    category: string;
+    subcategory: string;
+  }>;
+};
 
-export default async function Page({ params }: PageProps) {
-  const { category, subcategory, service } = await params
+export default async function SubCategoryPage({ params }: Props) {
+  const { category, subcategory } = await params;
 
-  const serviceData = await client.fetch(serviceBySlugQuery, {
-    slug: service,
-    subcategorySlug: subcategory,
-  })
+  const subcategoryData = await client.fetch(
+    subcategoryBySlugQuery,
+    {
+      categorySlug: category,
+      slug: subcategory,
+    }
+  );
 
-  if (!serviceData) {
-    return <div>Service niet gevonden</div>
+  if (!subcategoryData) {
+    notFound();
   }
 
-  const color = serviceData.parentSubcategory?.parentCategory?.color
+  const heroSection = subcategoryData.sections?.find(
+    (section: any) => section._type === "categoryHeroSection"
+  );
 
-  const heroSection = serviceData.sections?.find(
-    (s: any) => s._type === "categoryHeroSection"
-  )
+  console.log("SUB HERO:", heroSection);
 
-  const processSection = serviceData.sections?.find(
-    (s: any) => s._type === "processSection"
-  )
-
-  const uspSection = serviceData.sections?.find(
-    (s: any) => s._type === "uspSection"
-  )
-
-  const faqSection = serviceData.sections?.find(
-    (s: any) => s._type === "faqSection"
-  )
-
-  const ctaSection = serviceData.sections?.find(
-    (s: any) => s._type === "ctaSection"
-  )
+  const categoryColor =
+    subcategoryData.parentCategory?.color ?? "#f7f704";
+console.log(subcategoryData.sections);
 
   return (
-    <>
-  <CategoryHero
-  title={heroSection?.title ?? serviceData.title}
-  subtitle={heroSection?.subtitle}
-  imageUrl={heroSection?.backgroundImage?.asset?.url ?? serviceData.image?.asset?.url}
-  imageAlt={heroSection?.backgroundImage?.alt ?? serviceData.image?.alt}
-  color={color}
-/>
-
-      {serviceData.sections?.map((section: any, index: number) => {
-        switch (section._type) {
-          case "categoryIntroSection":
-            return (
-              <CategoryIntroSection
-                key={index}
-                title={section.title}
-                text={section.text}
-                color={color}
-              />
-            )
-
-          case "imageTextSection":
-            return (
-              <ImageTextSection
-                key={index}
-                label={section.label}
-                title={section.title}
-                text={section.text}
-                bulletPoints={section.bulletPoints}
-                imagePosition={section.imagePosition}
-                image={section.image}
-                cta={section.cta}
-                color={color}
-              />
-            )
-
-          case "processSection":
-            return (
-              <ProcessSection
-                key={index}
-                data={section}
-              />
-            )
-
-          default:
-            return null
+    <main className="bg-black text-white">
+      <SubCategoryHero
+        title={heroSection?.title ?? subcategoryData.title}
+        tagline={heroSection?.tagline ?? subcategoryData.tagline}
+        description={
+          heroSection?.description ??
+          subcategoryData.shortDescription
         }
-      })}
+        imageUrl={
+          heroSection?.image?.url ??
+          subcategoryData.image?.asset?.url
+        }
+        imageAlt={
+          heroSection?.image?.alt ??
+          subcategoryData.image?.alt
+        }
+        color={categoryColor}
+        stats={heroSection?.stats ?? []}
+      />
 
-      {/* USP + FAQ naast elkaar */}
-      {(uspSection || faqSection) && (
-        <section className="bg-gray-950 py-20 md:py-28">
-          <div className="max-w-7xl mx-auto px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
-              {uspSection && (
-                <UspSection
-                  label={uspSection.label}
-                  title={uspSection.title}
-                  intro={uspSection.intro}
-                  items={uspSection.items}
-                  color={color}
-                />
-              )}
-              {faqSection && (
-                <FaqSection
-                  title={faqSection.title}
-                  intro={faqSection.intro}
-                  items={faqSection.items}
-                  color={color}
-                />
-              )}
-            </div>
-          </div>
-        </section>
-      )}
-    </>
-  )
+      <div className="relative z-30 w-full bg-[#0a0a0a]">
+        {subcategoryData.sections?.map(
+          (section: any, index: number) => {
+            if (section._type === "categoryHeroSection") {
+              return null;
+            }
+
+            switch (section._type) {
+              case "categoryIntroSection":
+                return (
+                  <CategoryIntroSection
+                    key={index}
+                    title={section.title}
+                    text={section.text}
+                    color={categoryColor}
+                  />
+                );
+
+
+                case "imageTextSection":
+                return (
+                  <ImageTextSection
+                    key={index}
+                    label={section.label}
+                    title={section.title}
+                    text={section.text}
+                    bulletPoints={section.bulletPoints}
+                    imagePosition={section.imagePosition}
+                    image={section.image}
+                    cta={section.cta}
+                    color={categoryColor}
+                  />
+                );
+
+
+                case "uspSection":
+  return (
+    <UspSection
+      key={index}
+      label={section.label}
+      title={section.title}
+      intro={section.intro}
+      items={section.items}
+      color={categoryColor}
+    />
+  );
+
+              case "serviceListSection":
+                return (
+                  <CategoryServiceListSection
+                    key={index}
+                    services={section.services}
+                    title={section.title}
+                    intro={section.intro}
+                    color={categoryColor}
+                    categorySlug={category}
+                    subcategorySlug={subcategory}
+                  />
+                );
+
+              case "processSection":
+  return (
+    <ProcessSection
+      key={index}
+      data={{
+        label: section.label,
+        heading: section.heading,
+        intro: section.intro,
+        steps: section.steps,
+        ctaTitle: section.ctaTitle,
+        ctaText: section.ctaText,
+      }}
+    />
+  );
+
+        
+                case "faqSection":
+  return (
+    <FaqSection
+      key={index}
+      title={section.title}
+      intro={section.intro}
+      items={section.items}
+      color={categoryColor}
+    />
+  );
+
+              case "relatedServicesSection":
+                
+                return (
+               <CategoryRelatedServicesSection
+  key={index}
+  label={section.label}
+  title={section.title}
+  intro={section.intro}
+  services={section.services}
+  categorySlug={category}
+  //color={categoryColor}
+/>
+                );
+
+       case "ctaSection":
+                return (
+                  <CTASection
+                    key={index}
+                    data={{
+                      heading: section.title,
+                      subtext: section.text,
+                      trust: section.bullets,
+                      primaryLabel: section.buttonLabel,
+                      secondaryLabel:
+                        section.secondaryButtonLabel,
+                    }}
+                    color={categoryColor}
+                  />
+                );
+
+
+              default:
+                return null;
+            }
+          }
+        )}
+      </div>
+    </main>
+  );
 }

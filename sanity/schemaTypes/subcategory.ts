@@ -1,3 +1,4 @@
+// @/sanity/schemaTypes/subcategory.ts
 import { defineField, defineType } from 'sanity'
 
 export default defineType({
@@ -49,7 +50,6 @@ export default defineType({
       type: 'reference',
       group: 'content',
       to: [{ type: 'category' }],
-      validation: (Rule) => Rule.required(),
     }),
 
     defineField({
@@ -69,16 +69,20 @@ export default defineType({
       type: 'array',
       group: 'content',
       description: 'Bepaal welke secties zichtbaar zijn en in welke volgorde.',
-      of: [
-        { type: 'categoryHeroSection' },
-        { type: 'categoryIntroSection' },
-        { type: 'serviceListSection' },
-        { type: 'imageTextSection' },
-        { type: 'processSection' },
-        { type: 'uspSection' },
-        { type: 'faqSection' },
-        { type: 'ctaSection' },
-      ],
+    of: [
+  { type: 'categoryHeroSection' },
+  { type: 'categoryIntroSection' },
+  { type: 'serviceListSection' },
+  { type: 'imageTextSection' },
+  { type: 'materialSamplesSection' },
+  { type: 'processSection' },
+  { type: 'uspSection' },
+  { type: 'faqSection' },
+
+  { type: 'relatedServicesSection' }, // ← toevoegen
+
+  { type: 'ctaSection' },
+],
     }),
 
     defineField({

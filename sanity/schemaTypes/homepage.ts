@@ -271,6 +271,7 @@ export default defineType({
     // 🚀 CTA
     // ═══════════════════════════════════════════════════════
 
+
     defineField({
       name: "cta",
       title: "CTA sectie",
@@ -303,11 +304,27 @@ export default defineType({
           type: "string",
           initialValue: "Project starten",
         }),
+        // 👇 DIE MOET HIERBIJ:
+        defineField({
+          name: "primaryLink",
+          title: "Primaire knop link",
+          type: "string",
+          description: "Bijv. /contact of een volledige URL",
+          initialValue: "/contact",
+        }),
         defineField({
           name: "secondaryLabel",
           title: "Secundaire knop tekst",
           type: "string",
           initialValue: "Gratis advies",
+        }),
+        // 👇 EN DIE MOET HIERBIJ:
+        defineField({
+          name: "secondaryLink",
+          title: "Secundaire knop link",
+          type: "string",
+          description: "Bijv. /contact?type=advies",
+          initialValue: "/contact?type=advies",
         }),
       ],
     }),
